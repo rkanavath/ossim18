@@ -31,7 +31,7 @@
 #    include <sys/types.h>
 #    include <sys/malloc.h>
 #  else
-#    ifndef __FreeBSD__
+#if !defined( __FreeBSD__) && !defined(__OpenBSD__)
 #      include <malloc.h>
 #      include <string.h>
 #    endif
