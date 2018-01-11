@@ -191,7 +191,7 @@ ossimArgumentParser::~ossimArgumentParser()
 
 void ossimArgumentParser::initialize(int* argc, const char **argv)
 {
-   if(argc > 0) delete (theArgv);
+   if(*argc > 0) delete (theArgv);
    theArgc = argc;
    theArgv = new char*[*argc];
    for(int i=0;i<*argc;i++)
