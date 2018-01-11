@@ -28,19 +28,13 @@
 #include <exception>
 #include <vector>
 
-class ossimGeometryFactoryWrapper : public ossimReferenced
+class ossimGeometryFactoryWrapper : public ossimReferenced, public geos::geom::GeometryFactory
 {
 public:
    ossimGeometryFactoryWrapper()
-      : m_geomFactory(0)
-   {
-      geos::geom::PrecisionModel *pm =
-         new geos::geom::PrecisionModel(geos::geom::PrecisionModel::FLOATING);
-      m_geomFactory = new geos::geom::GeometryFactory(pm, -1); 
-   }
-   virtual ~ossimGeometryFactoryWrapper(){if(m_geomFactory) delete m_geomFactory;m_geomFactory=0;}
-   
-   geos::geom::GeometryFactory* m_geomFactory;
+     : geos::geom::GeometryFactory(new geos::geom::PrecisionModel(geos::geom::PrecisionModel::FLOATING),-1)
+  {}
+  virtual ~ossimGeometryFactoryWrapper(){}
 };
 
 class OssimPolyArea2dPrivate
@@ -55,7 +49,7 @@ public:
    void deleteGeometry() { if(m_geometry) { delete m_geometry; m_geometry = 0; }}
    void setGeometry(const ossimPolygon& polygon, const vector<ossimPolygon>& holes = vector<ossimPolygon>());
    void setGeometry(GeometryPtr geom){deleteGeometry();m_geometry=geom;}
-   geos::geom::GeometryFactory* geomFactory(){{return m_globalFactory.valid()?m_globalFactory->m_geomFactory:0;}}
+   geos::geom::GeometryFactory* geomFactory(){{return m_globalFactory.valid()?m_globalFactory.get():0;}}  
    GeometryPtr m_geometry;
    static ossimRefPtr<ossimGeometryFactoryWrapper> m_globalFactory; 
 };

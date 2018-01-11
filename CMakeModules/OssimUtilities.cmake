@@ -275,9 +275,7 @@ MACRO(OSSIM_LINK_LIBRARY)
                              INSTALL_NAME_DIR @rpath/Frameworks)
         ELSE(BUILD_OSSIM_FRAMEWORKS)
           SET_TARGET_PROPERTIES(${LINK_NAME} PROPERTIES 
-                             FRAMEWORK FALSE
-                             BUILD_WITH_INSTALL_RPATH ON 
-                             INSTALL_NAME_DIR @rpath/lib)
+                             FRAMEWORK FALSE)
         ENDIF(BUILD_OSSIM_FRAMEWORKS)
       ELSE(BUILD_SHARED_LIBRARY)
           SET_TARGET_PROPERTIES(${LINK_NAME} PROPERTIES 
