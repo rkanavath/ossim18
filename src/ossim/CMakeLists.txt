@@ -27,7 +27,10 @@ ENDIF(WIN32)
 
 ADD_DEFINITIONS("-DOSSIMMAKINGDLL")
 ############################### GRAB HEADERS #####################################
-FILE(GLOB ossim_HDRS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/../../include/ossim/*.h")
+set(ossim_HDRS
+  ${OSSIM_CONFIGURE_HEADER}
+  ${OSSIM_VERSION_HEADER}
+)
 FILE(GLOB ossim_base_HDRS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/../../include/ossim/base/*.h")
 FILE(GLOB ossim_elevation_HDRS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/../../include/ossim/elevation/*.h")
 FILE(GLOB ossim_font_HDRS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/../../include/ossim/font/*.h")
@@ -44,7 +47,6 @@ FILE(GLOB ossim_vec_HDRS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT
 FILE(GLOB ossim_video_HDRS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/../../include/ossim/video/*.h")
 FILE(GLOB ossim_vpfutil_HDRS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/../../include/ossim/vpfutil/*.h")
 
-MESSAGE( "${ossim_HDRS}" )
 SET(OSSIM_HEADER_FILES 
 	${ossim_HDRS}
  	${ossim_base_HDRS} ${ossim_elevation_HDRS} ${ossim_font_HDRS}  ${ossim_imaging_HDRS} ${ossim_init_HDRS}
@@ -135,7 +137,7 @@ IF(NOT OSSIM_BUILD_FRAMEWORKS OR NOT APPLE)
    install(FILES ${ossim_util_HDRS} DESTINATION include/ossim/util COMPONENT ossim) 
    install(FILES ${ossim_vec_HDRS} DESTINATION include/ossim/vec COMPONENT ossim) 
    install(FILES ${ossim_video_HDRS} DESTINATION include/ossim/video COMPONENT ossim) 
-   install(FILES ${ossim_vpfutil_HDRS} DESTINATION include/ossim/vpfutil COMPONENT ossim) 
+   install(FILES ${ossim_vpfutil_HDRS} DESTINATION include/ossim/vpfutil COMPONENT ossim)
 ENDIF(NOT OSSIM_BUILD_FRAMEWORKS OR NOT APPLE)
 # ENDIF(NOT OSSIM_FRAMEWORK_GENERATION OR NOT APPLE)
 

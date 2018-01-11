@@ -13,17 +13,15 @@ INCLUDE(OssimVersion)
 INCLUDE(OssimCommonVariables)
 
 # Expose some build options
-OPTION(BUILD_OSSIM_FREETYPE_SUPPORT "Set to ON to build OSSIM with freetype support.  Use OFF to turn off freetype support." ON)
+OPTION(BUILD_OSSIM_FREETYPE_SUPPORT "Set to ON to build OSSIM with freetype support.  Use OFF to turn off freetype support." OFF)
 
-OPTION(BUILD_OSSIM_MPI_SUPPORT "Set to ON to build OSSIM with MPI support.  Use OFF to turn off MPI support." ON)
+OPTION(BUILD_OSSIM_MPI_SUPPORT "Set to ON to build OSSIM with MPI support.  Use OFF to turn off MPI support." OFF)
 
 OPTION(BUILD_OSSIM_ID_SUPPORT "Set to ON to build OSSIM SVN ID support into the library.  Use OFF to turn off ID support." ON)
 
 OPTION(BUILD_OSSIM_APPS "Set to ON to build ossim apps.  Use OFF to disable." ON)
 OPTION(BUILD_OSSIM_CURL_APPS "Set to ON to build ossim curl dependent apps.  Use ON to enable." OFF)
-OPTION(BUILD_OSSIM_TEST_APPS "Set to ON to build ossim test apps.  Use OFF to disable." ON)
-
-OPTION(BUILD_OSSIM_APPS "Set to ON to build ossim test apps.  Use OFF to disable." ON)
+OPTION(BUILD_OSSIM_TEST_APPS "Set to ON to build ossim test apps.  Use OFF to disable." OFF)
 
 
 ###################################################################################
@@ -107,8 +105,8 @@ else( TIFF_FOUND )
    message( FATAL_ERROR "Could not find required tiff package!" )
 endif( TIFF_FOUND )
 
-# DL - Required on unix:
-if( UNIX )
+# DL - Required on linux:
+if( CMAKE_SYSTEM_NAME MATCHES "Linux" )
    find_library( DL_LIBRARY dl )
    if ( DL_LIBRARY )
       set( ossimDependentLibs ${ossimDependentLibs} ${DL_LIBRARY} )
@@ -116,7 +114,7 @@ if( UNIX )
       # TODO:  Is this required on unix?  If so move to the required section.
       message( FATAL_ERROR "Could not find dl library!" )
    endif( DL_LIBRARY )
-endif( UNIX )
+endif( )
 
 # FREETYPE - Optional:
 set( OSSIM_HAS_FREETYPE 0 )
@@ -158,19 +156,18 @@ endif ( ZLIB_FOUND )
 #---
 # Call the OSSIM macros in OssimUtilities.cmake
 #---
+include (SourceStatus)
+SET(OSSIM_REVISION_NUMBER)
+SET(OSSIM_GIT_MSG)
+repository_status(${PROJECT_SOURCE_DIR} OSSIM_GIT_MSG OSSIM_REVISION_NUMBER)
 TODAYS_DATE(OSSIM_BUILD_DATE)
-SET(OSSIM_SVN_REVISION_NUMBER "UNKNOWN")
-GET_SVN_REVISION()
-if ( NOT ${Project_WC_REVISION} EQUAL 0 )
-   set( OSSIM_SVN_REVISION_NUMBER ${Project_WC_REVISION} )
-endif()
 
 #####################################################################################
 # Call the configure files for ossimConfig and ossimVersion setup
 #####################################################################################
 set(OSSIM_VERSION_NUMBER "\"${OSSIM_VERSION}\"")
 set(OSSIM_BUILD_DATE "\"${OSSIM_BUILD_DATE}\"")
-set(OSSIM_REVISION_NUMBER "\"${OSSIM_SVN_REVISION_NUMBER}\"")
+set(OSSIM_REVISION_NUMBER "\"${OSSIM_REVISION_NUMBER}\"")
 
 # Setting of OSSIM_ID to variable expanded $Id$ results.  Embedded troughout code.
 set(OSSIM_ID_ENABLED   1)
@@ -178,11 +175,11 @@ IF(NOT BUILD_OSSIM_ID_SUPPORT)
    set(OSSIM_ID_ENABLED 0)
 ENDIF(NOT BUILD_OSSIM_ID_SUPPORT)
 
-SET(OSSIM_CONFIGURE_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/include/ossim/ossimConfig.h")
+SET(OSSIM_CONFIGURE_HEADER "${CMAKE_CURRENT_BINARY_DIR}/include/ossim/ossimConfig.h")
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/src/ossim/ossimConfig.h.in"
 	       "${OSSIM_CONFIGURE_HEADER}")
 SET(OSSIM_VERSION_HEADER_CONFIG "${CMAKE_CURRENT_SOURCE_DIR}/src/ossim/ossimVersion.h.in")
-SET(OSSIM_VERSION_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/include/ossim/ossimVersion.h")
+SET(OSSIM_VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/include/ossim/ossimVersion.h")
 CONFIGURE_FILE("${OSSIM_VERSION_HEADER_CONFIG}"
                "${OSSIM_VERSION_HEADER}")
 
@@ -231,10 +228,12 @@ INSTALL(FILES ${ossim_util_api_json} DESTINATION share/ossim/util COMPONENT ossi
 
 ###################### OUTPUT GENERAL VARIABLE SETTINGS #######################
 
+MESSAGE( STATUS "${OSSIM_GIT_MSG}" )
 MESSAGE( STATUS "OSSIM_REVISION_NUMBER           = ${OSSIM_REVISION_NUMBER}" )
 MESSAGE( STATUS "BUILD_LIBRARY_DIR               = ${BUILD_LIBRARY_DIR}" )
 MESSAGE( STATUS "BUILD_RUNTIME_DIR               = ${BUILD_RUNTIME_DIR}" )
 MESSAGE( STATUS "BUILD_OSSIM_FREETYPE_SUPPORT    = ${BUILD_OSSIM_FREETYPE_SUPPORT}" )
+MESSAGE( STATUS "BUILD_OSSIM_MPI_SUPPORT         = ${BUILD_OSSIM_MPI_SUPPORT}" )
 MESSAGE( STATUS "BUILD_OSSIM_APPS                = ${BUILD_OSSIM_APPS}" )
 MESSAGE( STATUS "BUILD_OSSIM_CURL_APPS           = ${BUILD_OSSIM_CURL_APPS}" )
 MESSAGE( STATUS "BUILD_OSSIM_TEST_APPS           = ${BUILD_OSSIM_TEST_APPS}" )
@@ -244,8 +243,10 @@ MESSAGE( STATUS "CMAKE_CXX_FLAGS                 = ${CMAKE_CXX_FLAGS}" )
 MESSAGE( STATUS "CMAKE_CXX_FLAGS_DEBUG           = ${CMAKE_CXX_FLAGS_DEBUG}" )
 MESSAGE( STATUS "CMAKE_CXX_FLAGS_RELEASE         = ${CMAKE_CXX_FLAGS_RELEASE}" )
 MESSAGE( STATUS "CMAKE_INSTALL_PREFIX            = ${CMAKE_INSTALL_PREFIX}" )
-MESSAGE( STATUS "FREETYPE_LIBRARY                = ${FREETYPE_LIBRARIES}" )
-MESSAGE( STATUS "FREETYPE_INCLUDE                = ${FREETYPE_INCLUDE_DIRS}" )
+if(BUILD_OSSIM_FREETYPE_SUPPORT)
+  MESSAGE( STATUS "FREETYPE_LIBRARY                = ${FREETYPE_LIBRARIES}" )
+  MESSAGE( STATUS "FREETYPE_INCLUDE                = ${FREETYPE_INCLUDE_DIRS}" )
+endif()
 MESSAGE( STATUS "GEOTIFF_LIBRARY                 = ${GEOTIFF_LIBRARIES}" )
 MESSAGE( STATUS "GEOTIFF_INCLUDE                 = ${GEOTIFF_INCLUDE_DIR}" )
 MESSAGE( STATUS "GEOTRANS_LIBRARY                = ${GEOTRANS_LIBRARY}" )
@@ -254,8 +255,10 @@ MESSAGE( STATUS "GEOS_LIBRARY                    = ${GEOS_LIBRARY}" )
 MESSAGE( STATUS "GEOS_INCLUDE                    = ${GEOS_INCLUDE_DIR}" )
 MESSAGE( STATUS "JPEG_LIBRARY                    = ${JPEG_LIBRARIES}" )
 MESSAGE( STATUS "JPEG_INCLUDE                    = ${JPEG_INCLUDE_DIR}" )
-MESSAGE( STATUS "MPI_LIBRARY                     = ${MPI_LIBRARIES}" )
-MESSAGE( STATUS "MPI_INCLUDE                     = ${MPI_INCLUDE_PATH}" )
+if(BUILD_OSSIM_MPI_SUPPORT)
+  MESSAGE( STATUS "MPI_LIBRARY                     = ${MPI_LIBRARIES}" )
+  MESSAGE( STATUS "MPI_INCLUDE                     = ${MPI_INCLUDE_PATH}" )
+endif()
 MESSAGE( STATUS "OPENTHREADS_LIBRARY             = ${OPENTHREADS_LIBRARY}" )
 MESSAGE( STATUS "OPENTHREADS_INCLUDE             = ${OPENTHREADS_INCLUDE_DIR}" )
 MESSAGE( STATUS "OSSIM_COMPILE_WITH_FULL_WARNING = ${OSSIM_COMPILE_WITH_FULL_WARNING}" )
@@ -264,6 +267,8 @@ MESSAGE( STATUS "TIFF_LIBRARY                    = ${TIFF_LIBRARIES}" )
 MESSAGE( STATUS "TIFF_INCLUDE                    = ${TIFF_INCLUDE_DIR}" )
 MESSAGE( STATUS "ZLIB_LIBRARY                    = ${ZLIB_LIBRARIES}" )
 MESSAGE( STATUS "ZLIB_INCLUDE                    = ${ZLIB_INCLUDE_DIR}" )
+MESSAGE( STATUS "OSSIM_CONFIGURE_HEADER          = ${OSSIM_CONFIGURE_HEADER}" )
+MESSAGE( STATUS "OSSIM_VERSION_HEADER            = ${OSSIM_VERSION_HEADER}" )
 
 #-----------------------------------------------------------------------------
 # uninstall target
