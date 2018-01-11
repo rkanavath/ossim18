@@ -24,6 +24,22 @@ OPTION(BUILD_OSSIM_CURL_APPS "Set to ON to build ossim curl dependent apps.  Use
 OPTION(BUILD_OSSIM_TEST_APPS "Set to ON to build ossim test apps.  Use OFF to disable." OFF)
 
 
+if(APPLE)
+  if(POLICY CMP0042)
+    cmake_policy(SET CMP0042 NEW)
+  endif()
+  set(CMAKE_MACOSX_RPATH TRUE)
+endif()
+
+set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+if("${isSystemDir}" STREQUAL "-1")
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+endif("${isSystemDir}" STREQUAL "-1")
+
 ###################################################################################
 # Include the Utilities in the root make
 ###################################################################################
